@@ -3,6 +3,8 @@
 #include <vector>
 #include <cctype>
 #include <typeinfo>
+#include <type_traits>
+
 
 using namespace std;
 // Enum type representing the types of lexemes
@@ -11,16 +13,15 @@ enum LexemeType {
 	IDENTIFIER,
 	OPERATOR,
 	NUMBER,
+	//FLOAT,
 	SEMICOLON,
 	OPEN_PAREN,//(
 	CLOSE_PAREN,//)
 	SQUARE_BRACKET,//[]
 	COMPARISON,
 	ASSIGNMENT,
-	IF_KEYWORD,
 	OTHER,
 	SPACE,
-	WHILE_KEYWORD,
 	ARRAY,
 };
 
@@ -33,7 +34,7 @@ struct Lexeme {
 
 // Function to check if a string is a keyword
 bool isKeyword(const string& str) {
-	return (str == "int" || str == "float" || str == "IF");
+	return (str == "int" || str == "float" || str == "if" || str == "while" || str == "else" || str == "str" || str == "begin" || str == "end");
 }
 
 // Function to analyze lexemes from the input string
@@ -42,6 +43,7 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 
 	string currentLexeme = "";
 	int position = 0;
+
 
 	for (size_t i = 0; i < input.size(); ++i) {
 		char ch = input[i];
@@ -62,6 +64,8 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 				{
 					lex.type = NUMBER;
 				}
+
+
 				else {
 					lex.type = OTHER;
 				}
@@ -299,8 +303,7 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		case ASSIGNMENT:
 			cout << "Assignment Operator";
 			break;
-		case IF_KEYWORD:
-			cout << "IF Keyword";
+
 			break;
 		case SPACE:
 			cout << "Space";
