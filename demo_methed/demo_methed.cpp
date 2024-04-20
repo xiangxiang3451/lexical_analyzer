@@ -34,7 +34,7 @@ struct Lexeme {
 
 // Function to check if a string is a keyword
 bool isKeyword(const string& str) {
-	return (str == "int" || str == "float" || str == "if" || str == "while" || str == "else" || str == "str" || str == "begin" || str == "end");
+	return (str == "int" || str == "float" || str == "if" || str == "while" || str == "else" || str == "str" || str == "begin" || str == "end" || str == "cin" || str == "cout");
 }
 
 // Function to analyze lexemes from the input string
