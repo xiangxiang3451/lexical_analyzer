@@ -4,7 +4,6 @@
 #include <cctype>
 #include <typeinfo>
 #include <type_traits>
-//jsjdjdjdjdjdjdj
 
 using namespace std;
 // Enum type representing the types of lexemes
@@ -44,9 +43,9 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 	string currentLexeme = "";
 	int position = 0;
 
-
 	for (size_t i = 0; i < input.size(); ++i) {
 		char ch = input[i];
+
 
 		if (isspace(ch) || ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == ';' || ch == '(' || ch == ')' || ch == '=' || ch == '!' || ch == ':' || ch == '>' || ch == '<' || ch == '[' || ch == ']') {
 			if (!currentLexeme.empty()) {
@@ -144,22 +143,8 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 				lex.value = " ";
 				lex.type = SPACE;
 				lex.position = position;
-				lexemes.push_back(lex);
+				/*	lexemes.push_back(lex);*/
 			}
-			/*else if (ch == '>') {
-				Lexeme lex;
-				lex.value = ">";
-				lex.type = COMPARISON;
-				lex.position = position;
-				lexemes.push_back(lex);
-			}
-			else if (ch == '<') {
-				Lexeme lex;
-				lex.value = "<";
-				lex.type = COMPARISON;
-				lex.position = position;
-				lexemes.push_back(lex);
-			}*/
 			else if (ch == '+') {
 				Lexeme lex;
 				lex.value = "+";
@@ -303,11 +288,9 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		case ASSIGNMENT:
 			cout << "Assignment Operator";
 			break;
-
-			break;
-		case SPACE:
-			cout << "Space";
-			break;
+			/*	case SPACE:
+					cout << "Space";
+					break;*/
 		case SQUARE_BRACKET:
 			cout << "square bracket";
 			break;
@@ -318,7 +301,6 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		cout << ", Position: " << lexeme.position << endl;
 	}
 }
-
 int main() {
 	string input;
 	cout << "Enter an input: ";
