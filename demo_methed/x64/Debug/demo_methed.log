@@ -1,4 +1,4 @@
 ﻿  demo_methed.cpp
-E:\Desktop\work-space\vs studio\demo_methed\demo_methed\demo_methed.cpp(54,29): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
-E:\Desktop\work-space\vs studio\demo_methed\demo_methed\demo_methed.cpp(233,27): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+E:\Desktop\work-space\vs studio\demo_methed\demo_methed\demo_methed.cpp(62,29): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+E:\Desktop\work-space\vs studio\demo_methed\demo_methed\demo_methed.cpp(259,27): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
   demo_methed.vcxproj -> E:\Desktop\work-space\vs studio\demo_methed\x64\Debug\demo_methed.exe

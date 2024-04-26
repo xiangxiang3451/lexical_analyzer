@@ -2,34 +2,38 @@
 #include <string>
 #include <vector>
 #include <cctype>
-#include <typeinfo>
-#include <type_traits>
+#include <cmath>
 
 using namespace std;
+
 // Enum type representing the types of lexemes
 enum LexemeType {
 	KEYWORD,
 	IDENTIFIER,
 	OPERATOR,
 	NUMBER,
-	//FLOAT,
+	FLOAT,
 	SEMICOLON,
-	OPEN_PAREN,//(
-	CLOSE_PAREN,//)
-	SQUARE_BRACKET,//[]
+	OPEN_PAREN,
+	CLOSE_PAREN,
+	SQUARE_BRACKET,
 	COMPARISON,
 	ASSIGNMENT,
 	OTHER,
 	SPACE,
-	ARRAY,
 };
-
 // Struct to store information of each lexeme
 struct Lexeme {
-	string value;    // Value of the lexeme
+	string value; // Value of the lexeme
 	LexemeType type; // Type of the lexeme
-	int position;    // Position of the lexeme in the input string
+	int position; // Position of the lexeme in the input string
+	double numericValue = 0.0; // Numeric value for numbers
 };
+
+// Converts a single character to its integer value
+int charToInt(char c) {
+	return c - '0';
+}
 
 // Function to check if a string is a keyword
 bool isKeyword(const string& str) {
@@ -42,138 +46,150 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 
 	string currentLexeme = "";
 	int position = 0;
+	bool isFloatingPoint = false; // Indicates whether we're dealing with a float
+	double floatingFactor = 0.1; // Factor for building floating-point numbers
+	int integerValue = 0; // Holds the integer part of the number
+	double floatValue = 0.0; // Holds the floating-point part
 
 	for (size_t i = 0; i < input.size(); ++i) {
 		char ch = input[i];
 
-
+		// If the character is a delimiter or operator
 		if (isspace(ch) || ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == ';' || ch == '(' || ch == ')' || ch == '=' || ch == '!' || ch == ':' || ch == '>' || ch == '<' || ch == '[' || ch == ']') {
 			if (!currentLexeme.empty()) {
 				Lexeme lex;
 				lex.value = currentLexeme;
 				lex.position = position - currentLexeme.size();
-				// Determine the type of the lexeme
+
 				if (isKeyword(currentLexeme)) {
 					lex.type = KEYWORD;
 				}
 				else if (isalpha(currentLexeme[0])) {
 					lex.type = IDENTIFIER;
 				}
-				else if (isdigit(currentLexeme[0]))
-				{
-					lex.type = NUMBER;
+				else if (isdigit(currentLexeme[0])) {
+					if (isFloatingPoint) {
+						lex.type = FLOAT;
+						lex.numericValue = integerValue + floatValue; // Combine the float value
+					}
+					else {
+						lex.type = NUMBER;
+						lex.numericValue = integerValue; // Store integer value
+					}
 				}
-
-
 				else {
 					lex.type = OTHER;
 				}
+
 				lexemes.push_back(lex);
-				currentLexeme = "";// Reset currentLexeme
+
+				// Reset for the next lexeme
+				currentLexeme = "";
+				isFloatingPoint = false;
+				integerValue = 0;
+				floatValue = 0.0;
+				floatingFactor = 0.1;
 			}
+
+			// Handle specific cases for operators and separators
 			if (ch == ':') {
 				if (i + 1 < input.size() && input[i + 1] == '=') {
-					// Check for comparison operator ":="
 					Lexeme lex;
 					lex.value = ":=";
 					lex.type = ASSIGNMENT;
 					lex.position = position;
+					/*lex.numericValue = 0;*/
 					lexemes.push_back(lex);
-					++i; // Skip the next character '='
+					++i; // Skip the next '='
 				}
 			}
-			else if (ch == '-') {
+			if (ch == '-') {
 				Lexeme lex;
 				lex.value = "-";
 				lex.type = OPERATOR;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == '*') {
+			if (ch == '*') {
 				Lexeme lex;
 				lex.value = "*";
 				lex.type = OPERATOR;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == '/') {
+			if (ch == '/') {
 				Lexeme lex;
 				lex.value = "/";
 				lex.type = OPERATOR;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == '(') {
+			if (ch == '(') {
 				Lexeme lex;
 				lex.value = "(";
 				lex.type = OPEN_PAREN;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == ')') {
+			if (ch == ')') {
 				Lexeme lex;
 				lex.value = ")";
 				lex.type = CLOSE_PAREN;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == '[') {
+			if (ch == '[') {
 				Lexeme lex;
 				lex.value = "[";
 				lex.type = SQUARE_BRACKET;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == ']') {
+			if (ch == ']') {
 				Lexeme lex;
 				lex.value = "]";
 				lex.type = SQUARE_BRACKET;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == ';') {
+			if (ch == ';') {
 				Lexeme lex;
 				lex.value = ";";
 				lex.type = SEMICOLON;
 				lex.position = position;
 				lexemes.push_back(lex);
 			}
-			else if (ch == ' ') {
-				Lexeme lex;
-				lex.value = " ";
-				lex.type = SPACE;
-				lex.position = position;
-				/*	lexemes.push_back(lex);*/
-			}
-			else if (ch == '+') {
-				Lexeme lex;
-				lex.value = "+";
-				lex.type = OPERATOR;
-				lex.position = position;
-				lexemes.push_back(lex);
-			}
-			// Process the current operator or separator as a separate lexeme
-			else if (ch == '=' && i + 1 < input.size() && input[i + 1] == '=') {
-				// Check for comparison operator "=="
-				Lexeme lex;
-				lex.value = "==";
-				lex.type = COMPARISON;
-				lex.position = position;
-				lexemes.push_back(lex);
-				++i; // Skip the next character '='
-			}
-			else if (ch == '!') {
+			if (ch == '!') {
 				if (i + 1 < input.size() && input[i + 1] == '=') {
-					// Check for comparison operator "!="
 					Lexeme lex;
 					lex.value = "!=";
+					lex.type = COMPARISON;
+					lex.position = position;
+					//lex.numericValue = 0;
+					lexemes.push_back(lex);
+					++i; // Skip the next '='
+				}
+			}
+			if (ch == '=') {
+				if (i + 1 < input.size() && input[i + 1] == '=') {
+					// Check for comparison operator ">="
+					Lexeme lex;
+					lex.value = "==";
 					lex.type = COMPARISON;
 					lex.position = position;
 					lexemes.push_back(lex);
 					++i; // Skip the next character '='
 				}
+				else
+				{
+					Lexeme lex;
+					lex.value = "=";
+					lex.type = COMPARISON;
+					lex.position = position;
+					lexemes.push_back(lex);
+				}
 			}
-			else if (ch == '>') {
+			if (ch == '>') {
 				if (i + 1 < input.size() && input[i + 1] == '=') {
 					// Check for comparison operator ">="
 					Lexeme lex;
@@ -192,7 +208,7 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 					lexemes.push_back(lex);
 				}
 			}
-			else if (ch == '<') {
+			if (ch == '<') {
 				if (i + 1 < input.size() && input[i + 1] == '=') {
 					// Check for comparison operator "<="
 					Lexeme lex;
@@ -211,41 +227,50 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 					lexemes.push_back(lex);
 				}
 			}
-			else {
-				// Process other single-character operators and separators
-				Lexeme lex;
-				lex.value = string(1, ch); // Convert char to string
-				lex.position = position;
-				lex.type = OTHER;
-				lexemes.push_back(lex);
-			}
 		}
 		else {
-			currentLexeme += ch;
+			currentLexeme += ch; // Build the current lexeme
+
+			// If it's a number, update integer or float value
+			if (isdigit(ch)) {
+				int num = charToInt(ch); // Convert to an integer value
+
+				if (isFloatingPoint) {
+					floatValue += num * floatingFactor; // Build floating-point part
+					floatingFactor *= 0.1; // Update the floating factor
+				}
+				else {
+					integerValue = integerValue * 10 + num; // Build integer value
+				}
+			}
+
+			if (ch == '.') {
+				isFloatingPoint = true; // Detected a floating-point number
+			}
 		}
-		++position;
+
+		++position; // Update the current position
 	}
 
-	// Final check for any remaining lexeme
+	// Handle the final lexeme, if any
 	if (!currentLexeme.empty()) {
 		Lexeme lex;
 		lex.value = currentLexeme;
 		lex.position = position - currentLexeme.size();
 
-		// Determine the type of the lexeme
 		if (isKeyword(currentLexeme)) {
 			lex.type = KEYWORD;
 		}
-		else if (isalpha(currentLexeme[0])) {
-			lex.type = IDENTIFIER;
-		}
 		else if (isdigit(currentLexeme[0])) {
-			lex.type = NUMBER;
+			if (isFloatingPoint) {
+				lex.type = FLOAT;
+				lex.numericValue = integerValue + floatValue; // Combine the float value
+			}
+			else {
+				lex.type = NUMBER;
+				lex.numericValue = integerValue; // Store integer value
+			}
 		}
-		else if (currentLexeme == "+") {
-			lex.type = OPERATOR;
-		}
-
 		else {
 			lex.type = OTHER;
 		}
@@ -256,7 +281,7 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 	return lexemes;
 }
 
-// Function to display information of lexemes
+// Function 
 void displayLexemes(const vector<Lexeme>& lexemes) {
 	for (const auto& lexeme : lexemes) {
 		cout << "Lexeme: " << lexeme.value << ", Type: ";
@@ -271,7 +296,10 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 			cout << "Operator";
 			break;
 		case NUMBER:
-			cout << "Number";
+			cout << "Number (Numeric Value: " << lexeme.numericValue << ")";
+			break;
+		case FLOAT:
+			cout << "Float (Numeric Value: " << lexeme.numericValue << ")";
 			break;
 		case SEMICOLON:
 			cout << "Semicolon";
@@ -282,17 +310,14 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		case CLOSE_PAREN:
 			cout << "Close Parenthesis";
 			break;
+		case SQUARE_BRACKET:
+			cout << "Square Bracket";
+			break;
 		case COMPARISON:
-			cout << "Comparison Operator";
+			cout << "Comparison";
 			break;
 		case ASSIGNMENT:
-			cout << "Assignment Operator";
-			break;
-			/*	case SPACE:
-					cout << "Space";
-					break;*/
-		case SQUARE_BRACKET:
-			cout << "square bracket";
+			cout << "Assignment";
 			break;
 		case OTHER:
 			cout << "Other";
@@ -301,6 +326,7 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		cout << ", Position: " << lexeme.position << endl;
 	}
 }
+// Main function to analyze input
 int main() {
 	string input;
 	cout << "Enter an input: ";
