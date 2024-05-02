@@ -19,7 +19,7 @@ enum LexemeType {
 	SQUARE_BRACKET,
 	COMPARISON,
 	ASSIGNMENT,
-	OTHER,
+	MISTAKE,
 	SPACE,
 };
 // Struct to store information of each lexeme
@@ -54,7 +54,6 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 	for (size_t i = 0; i < input.size(); ++i) {
 		char ch = input[i];
 
-		// If the character is a delimiter or operator
 		if (isspace(ch) || ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == ';' || ch == '(' || ch == ')' || ch == '=' || ch == '!' || ch == ':' || ch == '>' || ch == '<' || ch == '[' || ch == ']') {
 			if (!currentLexeme.empty()) {
 				Lexeme lex;
@@ -78,7 +77,7 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 					}
 				}
 				else {
-					lex.type = OTHER;
+					lex.type = MISTAKE;
 				}
 
 				lexemes.push_back(lex);
@@ -229,7 +228,6 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 			}
 		}
 		else {
-			currentLexeme += ch; // Build the current lexeme
 
 			// If it's a number, update integer or float value
 			if (isdigit(ch)) {
@@ -247,12 +245,13 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 			if (ch == '.') {
 				isFloatingPoint = true; // Detected a floating-point number
 			}
+			currentLexeme += ch; // Build the current lexeme
+
 		}
 
 		++position; // Update the current position
 	}
 
-	// Handle the final lexeme, if any
 	if (!currentLexeme.empty()) {
 		Lexeme lex;
 		lex.value = currentLexeme;
@@ -261,24 +260,87 @@ vector<Lexeme> analyzeLexemes(const string& input) {
 		if (isKeyword(currentLexeme)) {
 			lex.type = KEYWORD;
 		}
-		else if (isdigit(currentLexeme[0])) {
-			if (isFloatingPoint) {
-				lex.type = FLOAT;
-				lex.numericValue = integerValue + floatValue; // Combine the float value
+		// Check if the first character in currentLexeme is a digit
+		// Check if the first character in currentLexeme is a digit
+		// Check if the first character in currentLexeme is a digit
+		// Check if the first character in currentLexeme is a digit
+		// Check if the first character in currentLexeme is a digit
+		if (isdigit(currentLexeme[0])) {
+			bool hasLetterAfterDigit = false;
+			bool hasDecimalPoint = false;
+
+			// Iterate through the characters in currentLexeme
+			for (int i = 0; i < currentLexeme.length(); ++i) {
+				char ch = currentLexeme[i];
+
+				// Check if the current character is a letter immediately following a digit
+				if (i > 0 && isdigit(currentLexeme[i - 1]) && isalpha(ch)) {
+					hasLetterAfterDigit = true;
+					break;
+				}
+
+				// Check for multiple decimal points
+				if (ch == '.') {
+					if (hasDecimalPoint) {
+						// If a second decimal point is found, mark as a mistake
+						lex.type = MISTAKE;
+						break;
+					}
+					hasDecimalPoint = true;
+				}
+
+				// Check if the current character is not a digit or a decimal point
+				if (!isdigit(ch) && ch != '.') {
+					// If a non-digit or non-decimal point character is found, mark as a mistake
+					lex.type = MISTAKE;
+					break;
+				}
+			}
+			// If no mistakes were found, determine the type of number
+			if (hasLetterAfterDigit || hasDecimalPoint) {
+				// If a letter follows a digit or a decimal point is present, mark as a mistake
+				lex.type = MISTAKE;
 			}
 			else {
-				lex.type = NUMBER;
-				lex.numericValue = integerValue; // Store integer value
+				bool hasNonDigitCharacter = false;
+
+				// Iterate through the characters in currentLexeme
+				for (char ch : currentLexeme) {
+					// Check if the current character is not a digit
+					if (!isdigit(ch)) {
+						// If a non-digit character is found, mark as a mistake
+						hasNonDigitCharacter = true;
+						break;
+					}
+				}
+
+				// If any non-digit character was found, mark as a mistake
+				if (hasNonDigitCharacter) {
+					lex.type = MISTAKE;
+				}
+				else {
+					// Otherwise, determine the type of number based on the presence of a decimal point
+					if (hasDecimalPoint || isFloatingPoint) {
+						lex.type = FLOAT;
+						lex.numericValue = integerValue + floatValue; // Combine the float value
+					}
+					else {
+						lex.type = NUMBER;
+						lex.numericValue = integerValue; // Store integer value
+					}
+				}
 			}
 		}
-		else {
-			lex.type = OTHER;
+		else
+		{
+			lex.type = MISTAKE;
 		}
 
 		lexemes.push_back(lex);
 	}
 
 	return lexemes;
+
 }
 
 // Function 
@@ -319,8 +381,8 @@ void displayLexemes(const vector<Lexeme>& lexemes) {
 		case ASSIGNMENT:
 			cout << "Assignment";
 			break;
-		case OTHER:
-			cout << "Other";
+		case MISTAKE:
+			cout << "Mistake";
 			break;
 		}
 		cout << ", Position: " << lexeme.position << endl;
